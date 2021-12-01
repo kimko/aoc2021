@@ -3,16 +3,10 @@ defmodule Aoc21 do
   Documentation for `Aoc21`.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Aoc21.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  alias Aoc21.Day1
+  def run do
+    list = Day1.get_list_of_integers(:day1first)
+    IO.puts("Day 1 #{Day1.first(list)}")
+    IO.puts("Day 2 #{Day1.second(list)}")
   end
 end
