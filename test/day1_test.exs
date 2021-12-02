@@ -1,4 +1,4 @@
-defmodule AdventOfCode21.PuzzlesTest do
+defmodule AdventOfCode21.Day1Test do
   use ExUnit.Case
   alias Aoc21.Day1
 
