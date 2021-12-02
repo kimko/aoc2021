@@ -12,5 +12,6 @@ defmodule Aoc21 do
     IO.puts("Day 2 second: #{Day1.second(list)}")
     list = Day2.get_list_of_words(:day2)
     IO.puts("Day 2 first : #{Day2.first(list)}")
+    IO.puts("Day 2 second : #{Day2.second(list)}")
   end
 end

@@ -21,8 +21,19 @@ defmodule Aoc21.Day2 do
     {hor, dep - value}
   end
 
+  def aim_navigate([_command = "forward", value], {hor, dep, aim}) do
+    {hor + value, dep + aim * value, aim}
+  end
+
+  def aim_navigate([_command = "down", value], {hor, dep, aim}) do
+    {hor, dep, aim + value}
+  end
+
+  def aim_navigate([_command = "up", value], {hor, dep, aim}) do
+    {hor, dep, aim - value}
+  end
+
   def first(raw_list) do
-    # require IEx; IEx.pry
     {horizontal, depth} =
       raw_list
       |> Enum.map(&String.split/1)
@@ -33,11 +44,14 @@ defmodule Aoc21.Day2 do
     horizontal * depth
   end
 
-  def second(list_of_integers) do
-    # list_of_integers
-    # |> Enum.chunk_every(3, 1, :discard)
-    # |> Enum.map(&Enum.sum/1)
-    # |> Enum.reduce({0, 0}, &Day2.count_if_greater/2)
-    # |> elem(0)
+  def second(raw_list) do
+    {horizontal, depth, aim} =
+      raw_list
+      |> Enum.map(&String.split/1)
+      |> Enum.map(fn [c, v] -> [c, String.to_integer(v)] end)
+      |> Enum.reduce({0, 0, 0}, &Day2.aim_navigate/2)
+
+    IO.puts("Horizontal: #{horizontal} Depth: #{depth} Aim: #{aim}")
+    horizontal * depth
   end
 end
