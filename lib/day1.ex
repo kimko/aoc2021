@@ -1,6 +1,6 @@
 defmodule Aoc21.Day1 do
-
   alias Aoc21.Day1
+
   def get_list_of_integers(file) do
     File.read!("./lib/input/#{file}")
     |> String.split("\n")
@@ -17,16 +17,15 @@ defmodule Aoc21.Day1 do
 
   def first(list_of_integers) do
     list_of_integers
-    |> Enum.reduce({0,0}, &Day1.count_if_greater/2)
+    |> Enum.reduce({0, 0}, &Day1.count_if_greater/2)
     |> elem(0)
   end
 
   def second(list_of_integers) do
-    (list_of_integers)
+    list_of_integers
     |> Enum.chunk_every(3, 1, :discard)
     |> Enum.map(&Enum.sum/1)
-    |> Enum.reduce({0,0}, &Day1.count_if_greater/2)
+    |> Enum.reduce({0, 0}, &Day1.count_if_greater/2)
     |> elem(0)
   end
-
 end

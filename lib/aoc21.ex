@@ -4,6 +4,7 @@ defmodule Aoc21 do
   """
 
   alias Aoc21.Day1
+
   def run do
     list = Day1.get_list_of_integers(:day1first)
     IO.puts("Day 1 #{Day1.first(list)}")
