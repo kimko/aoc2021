@@ -3,7 +3,7 @@ defmodule Aoc21.Day1 do
 
   def get_list_of_integers(file) do
     File.read!("./lib/input/#{file}")
-    |> String.split("\n")
+    |> String.split("\n", trim: true)
     |> Enum.map(&String.to_integer/1)
   end
 

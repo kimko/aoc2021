@@ -3,7 +3,7 @@ defmodule Aoc21.Day2 do
 
   def get_list_of_words(file) do
     File.read!("./lib/input/#{file}")
-    |> String.split("\n")
+    |> String.split("\n", trim: true)
   end
 
   def navigate([_command = "forward", value], {hor, dep}) do
