@@ -69,7 +69,7 @@ defmodule Aoc21.Day3 do
     end
   end
 
-  def compute(input_lists, sum, length, position, rating) do
+  def compute({sum, length}, input_lists, position, rating) do
     new_input_lists =
       input_lists
       |> Enum.filter(fn list -> Enum.at(list, position) == get_filter(sum, length, rating) end)
@@ -83,11 +83,13 @@ defmodule Aoc21.Day3 do
     if tail == [] do
       head
     else
-      column = input_lists |> Enum.zip() |> Enum.map(&Tuple.to_list/1) |> Enum.at(position)
-      sum = Enum.sum(column)
-      length = Enum.count(column)
-      new_input_lists = compute(input_lists, sum, length, position, rating)
-      calculate_rating(new_input_lists, position + 1, rating)
+      input_lists
+      |> Enum.zip()
+      |> Enum.map(&Tuple.to_list/1)
+      |> Enum.at(position)
+      |> (fn column -> {Enum.sum(column), Enum.count(column)} end).()
+      |> compute(input_lists, position, rating)
+      |> calculate_rating(position + 1, rating)
     end
   end
 
