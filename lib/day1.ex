@@ -15,13 +15,13 @@ defmodule Aoc21.Day1 do
     if new > last, do: {count + 1, new}, else: {count, new}
   end
 
-  def first(list_of_integers) do
+  def part_1(list_of_integers) do
     list_of_integers
     |> Enum.reduce({0, 0}, &Day1.count_if_greater/2)
     |> elem(0)
   end
 
-  def second(list_of_integers) do
+  def part_2(list_of_integers) do
     list_of_integers
     |> Enum.chunk_every(3, 1, :discard)
     |> Enum.map(&Enum.sum/1)

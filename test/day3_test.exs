@@ -2,9 +2,9 @@ defmodule AdventOfCode21.Day3Test do
   use ExUnit.Case
   alias Aoc21.Day3
 
-  test "Day3 first" do
+  test "Day3 part_1" do
     result =
-      Day3.first("""
+      Day3.part_1("""
       00100
       11110
       10110
@@ -22,9 +22,9 @@ defmodule AdventOfCode21.Day3Test do
     assert result == 198
   end
 
-  test "Day3 second" do
+  test "Day3 part_2" do
     result =
-      Day3.second("""
+      Day3.part_2("""
       00100
       11110
       10110

@@ -33,7 +33,7 @@ defmodule Aoc21.Day2 do
     {hor, dep, aim - value}
   end
 
-  def first(raw_list) do
+  def part_1(raw_list) do
     {horizontal, depth} =
       raw_list
       |> Enum.map(&String.split/1)
@@ -44,7 +44,7 @@ defmodule Aoc21.Day2 do
     horizontal * depth
   end
 
-  def second(raw_list) do
+  def part_2(raw_list) do
     {horizontal, depth, _} =
       raw_list
       |> Enum.map(&String.split/1)

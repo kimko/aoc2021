@@ -27,7 +27,7 @@ defmodule Aoc21.Day3 do
     list |> Enum.map(&String.to_integer/1)
   end
 
-  def first(raw_list) do
+  def part_1(raw_list) do
     list = raw_list |> String.split("\n", trim: true)
     length = Enum.count(list) / 2
 
@@ -93,7 +93,7 @@ defmodule Aoc21.Day3 do
     end
   end
 
-  def second(input) do
+  def part_2(input) do
     base_list =
       input
       |> String.split("\n", trim: true)

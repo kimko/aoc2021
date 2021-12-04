@@ -7,14 +7,14 @@ defmodule Aoc21 do
   alias Aoc21.Day2
 
   def run do
-    list = Day1.get_list_of_integers(:day1first)
-    IO.puts("Day 1 first : #{Day1.first(list)}")
-    IO.puts("Day 2 second: #{Day1.second(list)}")
+    list = Day1.get_list_of_integers(:day1)
+    IO.puts("Day 1 part 1: #{Day1.part_1(list)}")
+    IO.puts("Day 2 part 2: #{Day1.part_2(list)}")
     list = Day2.get_list_of_words(:day2)
-    IO.puts("Day 2 first : #{Day2.first(list)}")
-    IO.puts("Day 2 second: #{Day2.second(list)}")
+    IO.puts("Day 2 part 1: #{Day2.part_1(list)}")
+    IO.puts("Day 2 part 2: #{Day2.part_2(list)}")
     list = Aoc21.Day3Input.input()
-    IO.puts("Day 3 first : #{Aoc21.Day3.first(list)}")
-    IO.puts("Day 3 second: #{Aoc21.Day3.second(list)}")
+    IO.puts("Day 3 part 1: #{Aoc21.Day3.part_1(list)}")
+    IO.puts("Day 3 part 2: #{Aoc21.Day3.part_2(list)}")
   end
 end
