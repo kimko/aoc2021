@@ -9,7 +9,7 @@ defmodule Aoc21 do
   def run do
     list = Day1.get_list_of_integers(:day1)
     IO.puts("Day 1 part 1: #{Day1.part_1(list)}")
-    IO.puts("Day 2 part 2: #{Day1.part_2(list)}")
+    IO.puts("Day 1 part 2: #{Day1.part_2(list)}")
     list = Day2.get_list_of_words(:day2)
     IO.puts("Day 2 part 1: #{Day2.part_1(list)}")
     IO.puts("Day 2 part 2: #{Day2.part_2(list)}")
