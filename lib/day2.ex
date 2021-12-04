@@ -40,18 +40,18 @@ defmodule Aoc21.Day2 do
       |> Enum.map(fn [c, v] -> [c, String.to_integer(v)] end)
       |> Enum.reduce({0, 0}, &Day2.navigate/2)
 
-    IO.puts("Horizontal: #{horizontal} Depth: #{depth}")
+    # IO.puts("Horizontal: #{horizontal} Depth: #{depth}")
     horizontal * depth
   end
 
   def second(raw_list) do
-    {horizontal, depth, aim} =
+    {horizontal, depth, _} =
       raw_list
       |> Enum.map(&String.split/1)
       |> Enum.map(fn [c, v] -> [c, String.to_integer(v)] end)
       |> Enum.reduce({0, 0, 0}, &Day2.aim_navigate/2)
 
-    IO.puts("Horizontal: #{horizontal} Depth: #{depth} Aim: #{aim}")
+    # IO.puts("Horizontal: #{horizontal} Depth: #{depth} Aim: #{aim}")
     horizontal * depth
   end
 end
