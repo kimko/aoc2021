@@ -17,8 +17,10 @@ defmodule Aoc21 do
     IO.puts("Day 3 part 1: #{Aoc21.Day3.part_1(list)}")
     IO.puts("Day 3 part 2: #{Aoc21.Day3.part_2(list)}")
 
-    IO.puts(
-      "Day 4 part 1: #{Aoc21.Day4.part_1(Aoc21.Day4Input.numbers(), Aoc21.Day4Input.boards())}"
-    )
+    # IO.puts(
+    #   "Day 4 part 1: #{Aoc21.Day4.part_1(Aoc21.Day4Input.numbers(), Aoc21.Day4Input.boards())}"
+    # )
+    result = Aoc21.Day4.part_1(Aoc21.Day4Input.numbers(), Aoc21.Day4Input.boards())
+    IO.puts(inspect(result))
   end
 end
