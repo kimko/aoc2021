@@ -94,27 +94,28 @@ defmodule Aoc21.Day4 do
 
   def find_winning_board(boards, numbers) do
     numbers
-    |> Enum.reduce_while({boards, %{}}, fn bingo_number, {boards, _current_board} ->
-      {result_map, new_outcome} =
-        Enum.reduce_while(boards, {%{}, ""}, fn {board_no, board}, {updated_boards, _outcome} ->
+    |> Enum.reduce_while({boards, %{}, 0}, fn bingo_number, {boards, _current_board, _no} ->
+      {result_map, new_outcome, board_no} =
+        Enum.reduce_while(boards, {%{}, "", 0}, fn {board_no, board},
+                                                   {updated_boards, _outcome, _no} ->
           {updated_board, new_outcome} = process_board(board, bingo_number)
 
           if new_outcome == :bingo do
-            {:halt, {updated_board, :bingo}}
+            {:halt, {updated_board, :bingo, board_no}}
           else
-            {:cont, {Map.put(updated_boards, board_no, updated_board), new_outcome}}
+            {:cont, {Map.put(updated_boards, board_no, updated_board), new_outcome, board_no}}
           end
         end)
 
       if new_outcome == :bingo do
-        {:halt, {result_map, bingo_number}}
+        {:halt, {result_map, bingo_number, board_no}}
       else
-        {:cont, {result_map, :no_bingo}}
+        {:cont, {result_map, :no_bingo, board_no}}
       end
     end)
   end
 
-  def sum_unmarked_numbers({board, final_number}) do
+  def sum_unmarked_numbers({board, final_number, _}) do
     board
     |> Enum.reduce(%{}, fn {_row_no, row}, numbers ->
       Map.merge(numbers, row, fn _, v, _ -> v end)
@@ -145,6 +146,17 @@ defmodule Aoc21.Day4 do
     |> sum_unmarked_numbers()
   end
 
+  def find_winning_boards(boards, numbers, winners) do
+    if boards == %{} do
+      winners
+    else
+      {board, final_number, board_no} = find_winning_board(boards, numbers)
+      updated_winners = [{board, final_number, board_no} | winners]
+      {_, tail} = Map.pop!(boards, board_no)
+      find_winning_boards(tail, numbers, updated_winners)
+    end
+  end
+
   def part_2(raw_numbers, raw_boards) do
     numbers =
       raw_numbers
@@ -157,7 +169,10 @@ defmodule Aoc21.Day4 do
     |> Enum.map(&get_bingo_rows/1)
     |> Enum.chunk_every(5)
     |> make_boards(%{}, 0)
-    |> (fn boards -> find_winning_board(boards, numbers) end).()
-    |> sum_unmarked_numbers()
+    |> (fn boards -> find_winning_boards(boards, numbers, []) end).()
+    |> (fn winners ->
+          [head | _] = winners
+          sum_unmarked_numbers(head)
+        end).()
   end
 end

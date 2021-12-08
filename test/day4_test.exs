@@ -53,7 +53,7 @@ defmodule AdventOfCode21.Day4Test do
      2  0 12  3  7
     """
 
-    result = Day4.part_1(numbers, boards)
+    result = Day4.part_2(numbers, boards)
 
     assert result == 1924
   end
