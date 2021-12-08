@@ -107,11 +107,26 @@ defmodule Aoc21.Day4 do
         end)
 
       if new_outcome == :bingo do
-        {:halt, {result_map, :bingo}}
+        {:halt, {result_map, bingo_number}}
       else
         {:cont, {result_map, :no_bingo}}
       end
     end)
+  end
+
+  def sum_unmarked_numbers({board, final_number}) do
+    board
+    |> Enum.reduce(%{}, fn {_row_no, row}, numbers ->
+      Map.merge(numbers, row, fn _, v, _ -> v end)
+    end)
+    |> Enum.reduce(0, fn {number, status}, sum ->
+      if status == false do
+        number + sum
+      else
+        sum
+      end
+    end)
+    |> (fn sum -> sum * final_number end).()
   end
 
   def part_1(raw_numbers, raw_boards) do
@@ -127,5 +142,6 @@ defmodule Aoc21.Day4 do
     |> Enum.chunk_every(5)
     |> make_boards(%{}, 0)
     |> (fn boards -> find_winning_board(boards, numbers) end).()
+    |> sum_unmarked_numbers()
   end
 end
