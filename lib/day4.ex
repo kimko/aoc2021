@@ -144,4 +144,20 @@ defmodule Aoc21.Day4 do
     |> (fn boards -> find_winning_board(boards, numbers) end).()
     |> sum_unmarked_numbers()
   end
+
+  def part_2(raw_numbers, raw_boards) do
+    numbers =
+      raw_numbers
+      |> String.split(",")
+      |> Enum.map(&String.to_integer/1)
+
+    raw_boards
+    |> String.split("\n", trim: true)
+    |> Enum.map(&String.codepoints/1)
+    |> Enum.map(&get_bingo_rows/1)
+    |> Enum.chunk_every(5)
+    |> make_boards(%{}, 0)
+    |> (fn boards -> find_winning_board(boards, numbers) end).()
+    |> sum_unmarked_numbers()
+  end
 end
