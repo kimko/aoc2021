@@ -68,38 +68,40 @@ defmodule Aoc21.Day4 do
     end
   end
 
-  def process_rows_cols(board, bingo_number) do
-    # [head | tail] = rowcols
-    # IO.puts("#{bingo_number} #{head} #{board_no} #{type} #{head}")
-    IO.puts("process_rows_cols #{bingo_number}")
-    {board, :eh}
-    # get_and_update_in(boards, )
-    # if get_in(board, [type, head, bingo_number]) == false do
-    #   updated_boards = boards
-    #   |> put_in([board_no, type, head, bingo_number], true)
-    #   |> put_in([board_no, type, head, :bingo], get_in(boards, [board_no, type, head, :bingo]) + 1)
-    #   updated_bingo = get_in(updated_boards, [board_no, type, head, :bingo])
-    # end
-    #   if tail == []|> process_rows_cols(bingo_number, board_no, tail, type)
-    # end
+  def process_board(board, bingo_number, board_number) do
+    Enum.reduce_while(board, {board, ""}, fn {row_no, numbers}, {updated_board, _outcome} ->
+      # IO.puts("numbers")
+      # IO.puts(inspect(numbers))
+      # IO.puts("inital updated board")
+      # IO.puts(inspect(updated_board))
+      updated_numbers =
+        if Map.get(numbers, bingo_number) != nil do
+          # IO.puts("HIT Board #{board_number} row #{row_no} Number #{bingo_number}")
+          numbers
+          |> Map.replace(bingo_number, true)
+          |> Map.update(:bingo, 999, fn x -> x + 1 end)
+        else
+          numbers
+        end
+
+      # IO.puts("Tally #{Map.get(updated_numbers,:bingo)}")
+      # IO.puts(inspect(updated_numbers))
+      updated_board = Map.replace(updated_board, row_no, updated_numbers)
+      # IO.puts("New updated Board")
+      # IO.puts(inspect(updated_board))
+
+      {haltCont, result} =
+        if Map.get(updated_numbers, :bingo) == 5 do
+          IO.puts("BingoHere")
+          # IO.puts(inspect(updated_board))
+          {:halt, {updated_board, :bingo}}
+        else
+          {:cont, {updated_board, :no_bingo}}
+        end
+
+      {haltCont, result}
+    end)
   end
-
-  # def process_number(boards, bingo_number, board_numbers) do
-  #   [head | tail] = board_numbers
-
-  #   updated_boards = board_numbers
-  #   |> Enum.reduce_while(boards, fn number, boards ->
-  #     {:halt, }
-  #     # {result, board}= process_rows_cols(get_in(boards, [board_number, :cols], bingo_number, Enum.to_list(0..4))
-  #     # {result, Map.put(acc, board_number, board)}
-  #   end)
-  #   # |> process_rows_cols(bingo_number, head, Enum.to_list(0..4), :rows)
-  #   if tail != [] do
-  #     process_number(updated_boards, bingo_number, tail)
-  #   else
-  #     updated_boards
-  #   end
-  # end
 
   def find_winning_board(boards, numbers, board_count, iteration, _winner = nil) do
     [head | tail] = numbers
@@ -110,19 +112,19 @@ defmodule Aoc21.Day4 do
       numbers
       |> Enum.reduce_while({boards, %{}}, fn bingo_number, {boards, _current_board} ->
         IO.puts("next bingo number #{bingo_number}")
-        IO.puts(inspect(boards))
 
         # updated_boards = Enum.reduce(boards, %{}, fn {number, board}, updated_boards -> Map.put(updated_boards, number ,update_in(board, [ :cols, 0, :bingo], &(&1 + 1)))end)
         {result_map, new_outcome} =
-          Enum.reduce_while(boards, {%{}, ""}, fn {key, board}, {updated_boards, _outcome} ->
-            {updated_board, new_outcome} = process_rows_cols(board, bingo_number)
-            IO.puts("result #{new_outcome}")
-            IO.puts(inspect(%{key => updated_board}))
+          Enum.reduce_while(boards, {%{}, ""}, fn {board_no, board}, {updated_boards, _outcome} ->
+            {updated_board, new_outcome} = process_board(board, bingo_number, board_no)
+            IO.puts("here")
+            # IO.puts(inspect(%{board_no => updated_board}))
 
             if new_outcome == :bingo do
+              IO.puts(inspect(updated_board))
               {:halt, {updated_board, :bingo}}
             else
-              {:cont, {Map.put(updated_boards, key, updated_board), new_outcome}}
+              {:cont, {Map.put(updated_boards, board_no, updated_board), new_outcome}}
             end
 
             # else
