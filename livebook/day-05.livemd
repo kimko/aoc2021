@@ -21,6 +21,8 @@ input = Kino.Input.textarea("Please paste your input:")
 ```
 
 ```elixir
+# convert lines to list of tuples with four intergers
+# [{0, 1, 2, 3},...]
 lines =
   input
   |> Kino.Input.read()
@@ -35,51 +37,42 @@ lines =
 
 ```elixir
 defmodule Line do
-  def add_line_type({x1, y1, x2, y2}) when x1 == x2 do
-    {{x1, y1, x2, y2}, "hori"}
+  def generate_points({x1, y1, x2, y2}) when y1 == y2 do
+    Enum.map(x1..x2, fn x -> {x, y1} end)
   end
 
-  def add_line_type({x1, y1, x2, y2}) when y1 == y2 do
-    {{x1, y1, x2, y2}, "vert"}
+  def generate_points({x1, y1, x2, y2}) when x1 == x2 do
+    Enum.map(y1..y2, fn y -> {x1, y} end)
   end
 
-  def add_line_type({x1, y1, x2, y2}) do
-    {{x1, y1, x2, y2}, "diag"}
+  def generate_points({x1, y1, x2, y2}) do
+    diagonal(x1, y1, x2, y2, [])
   end
 
-  def generate_points({{x1, y, x2, _}, _type = "vert"}) do
-    Enum.map(x1..x2, fn x -> {x, y} end)
-  end
-
-  def generate_points({{x, y1, _, y2}, _type = "hori"}) do
-    Enum.map(y1..y2, fn y -> {x, y} end)
-  end
-
-  def generate_points({{x1, y1, x2, y2}, _type = "diag"}) do
-    vert(x1, y1, x2, y2, [])
-  end
-
-  def vert(x1, y1, x2, y2, points) do
+  def diagonal(x1, y1, x2, y2, points) do
     xinc = if x1 > x2, do: -1, else: 1
     yinc = if y1 > y2, do: -1, else: 1
     new_points = [{x1, y1} | points]
 
     if x1 != x2 do
-      vert(x1 + xinc, y1 + yinc, x2, y2, new_points)
+      diagonal(x1 + xinc, y1 + yinc, x2, y2, new_points)
     else
       [{x2, y2} | points]
     end
+  end
+
+  def is_diagonal({x1, y1, x2, y2}) when x1 != x2 and y1 != y2 do
+    true
+  end
+
+  def is_diagonal({_, _, _, _}) do
+    false
   end
 end
 
 lines =
   lines
-  |> Enum.map(&Line.add_line_type/1)
-  |> Enum.filter(fn {_line, type} ->
-    if type != "diag" do
-      true
-    end
-  end)
+  |> Enum.filter(&Line.is_diagonal/1)
   |> Enum.map(&Line.generate_points/1)
   |> Enum.reduce([], fn points, new_list ->
     Enum.concat(points, new_list)
@@ -144,7 +137,6 @@ lines =
 ```elixir
 lines =
   lines
-  |> Enum.map(&Line.add_line_type/1)
   |> Enum.map(&Line.generate_points/1)
   |> Enum.reduce([], fn points, new_list ->
     Enum.concat(points, new_list)
