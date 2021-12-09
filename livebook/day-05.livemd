@@ -1,0 +1,186 @@
+<!-- vim: syntax=markdown -->
+
+# Day 5 me
+
+## Setup
+
+* [Stream recording](https://www.twitch.tv/videos/1225076231)
+* [Stream summary](https://www.youtube.com/watch?v=8_HGMrAZykw)
+
+```elixir
+Mix.install(
+  [
+    {:kino, "~> 0.4.1"}
+  ],
+  consolidate_protocols: false
+)
+```
+
+```elixir
+input = Kino.Input.textarea("Please paste your input:")
+```
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+  |> Enum.map(fn line ->
+    line
+    |> String.split([" -> ", ","])
+    |> Enum.map(&String.to_integer/1)
+    |> List.to_tuple()
+  end)
+```
+
+```elixir
+defmodule Line do
+  def add_line_type({x1, y1, x2, y2}) when x1 == x2 do
+    {{x1, y1, x2, y2}, "hori"}
+  end
+
+  def add_line_type({x1, y1, x2, y2}) when y1 == y2 do
+    {{x1, y1, x2, y2}, "vert"}
+  end
+
+  def add_line_type({x1, y1, x2, y2}) do
+    {{x1, y1, x2, y2}, "diag"}
+  end
+
+  def generate_points({{x1, y, x2, _}, _type = "vert"}) do
+    Enum.map(x1..x2, fn x -> {x, y} end)
+  end
+
+  def generate_points({{x, y1, _, y2}, _type = "hori"}) do
+    Enum.map(y1..y2, fn y -> {x, y} end)
+  end
+
+  def generate_points({{x1, y1, x2, y2}, _type = "diag"}) do
+    vert(x1, y1, x2, y2, [])
+  end
+
+  def vert(x1, y1, x2, y2, points) do
+    xinc = if x1 > x2, do: -1, else: 1
+    yinc = if y1 > y2, do: -1, else: 1
+    new_points = [{x1, y1} | points]
+
+    if x1 != x2 do
+      vert(x1 + xinc, y1 + yinc, x2, y2, new_points)
+    else
+      [{x2, y2} | points]
+    end
+  end
+end
+
+lines =
+  lines
+  |> Enum.map(&Line.add_line_type/1)
+  |> Enum.filter(fn {_line, type} ->
+    if type != "diag" do
+      true
+    end
+  end)
+  |> Enum.map(&Line.generate_points/1)
+  |> Enum.reduce([], fn points, new_list ->
+    Enum.concat(points, new_list)
+  end)
+  |> Enum.reduce(%{}, fn point, acc -> Map.update(acc, point, 1, &(&1 + 1)) end)
+
+lines
+```
+
+```elixir
+Enum.each(0..9, fn y ->
+  line =
+    Enum.reduce(0..9, "", fn x, acc ->
+      overlaps = Map.get(lines, {x, y})
+
+      if overlaps == nil do
+        Enum.join([acc, "."], " ")
+      else
+        # Enum.join([acc, " "], " ")
+        Enum.join([acc, Integer.to_string(overlaps)], " ")
+      end
+    end)
+
+  IO.puts(line)
+end)
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+lines
+|> Map.to_list()
+|> Enum.map(fn {_, x} ->
+  if x > 1 do
+    true
+  end
+end)
+|> Enum.count(fn x ->
+  if x do
+    true
+  end
+end)
+```
+
+## Part 2
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+  |> Enum.map(fn line ->
+    line
+    |> String.split([" -> ", ","])
+    |> Enum.map(&String.to_integer/1)
+    |> List.to_tuple()
+  end)
+```
+
+```elixir
+lines =
+  lines
+  |> Enum.map(&Line.add_line_type/1)
+  |> Enum.map(&Line.generate_points/1)
+  |> Enum.reduce([], fn points, new_list ->
+    Enum.concat(points, new_list)
+  end)
+  |> Enum.reduce(%{}, fn point, acc -> Map.update(acc, point, 1, &(&1 + 1)) end)
+```
+
+```elixir
+Enum.each(0..9, fn y ->
+  line =
+    Enum.reduce(0..9, "", fn x, acc ->
+      overlaps = Map.get(lines, {x, y})
+
+      if overlaps == nil do
+        Enum.join([acc, "."], " ")
+      else
+        # Enum.join([acc, " "], " ")
+        Enum.join([acc, Integer.to_string(overlaps)], " ")
+      end
+    end)
+
+  IO.puts(line)
+end)
+```
+
+```elixir
+lines
+|> Map.to_list()
+|> Enum.map(fn {_, x} ->
+  if x > 1 do
+    true
+  end
+end)
+|> Enum.count(fn x ->
+  if x do
+    true
+  end
+end)
+```
