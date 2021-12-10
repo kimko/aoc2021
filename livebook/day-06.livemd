@@ -34,12 +34,11 @@ lines =
 ```elixir
 defmodule Fish do
   def process(_current_day = [], next_day, _new_fish = 0) do
-    Enum.reverse(next_day)
+    next_day
   end
 
   def process(_current_day = [], next_day, new_fish) do
     Enum.reduce(0..(new_fish - 1), next_day, fn _, next_day -> [8 | next_day] end)
-    |> Enum.reverse()
   end
 
   def process(current_day, next_day, new_fish) do
@@ -52,8 +51,36 @@ defmodule Fish do
   end
 end
 
-Enum.reduce(0..79, lines, fn _, lines ->
+lines = Enum.reverse(lines)
+
+Enum.reduce(0..17, lines, fn _, lines ->
   Fish.process(lines, [], 0)
 end)
 |> Enum.count()
+```
+
+## Part 2
+
+```elixir
+defmodule Fish2 do
+  def process({p0, p1, p2, p3, p4, p5, p6, p7, p8}) do
+    # IO.puts(inspect({p0, p1, p2, p3, p4, p5, p6, p7, p8}))
+    {p1, p2, p3, p4, p5, p6, p7 + p0, p8, p0}
+  end
+end
+
+frequencies =
+  input
+  |> Kino.Input.read()
+  |> String.split(",", trim: true)
+  |> Enum.map(&String.to_integer/1)
+  |> Enum.frequencies()
+
+amounts =
+  Enum.map(0..8, fn i -> frequencies[i] || 0 end)
+  |> List.to_tuple()
+
+1..80
+|> Enum.reduce(amounts, fn _, amounts -> Fish2.process(amounts) end)
+|> Tuple.sum()
 ```
