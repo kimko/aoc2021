@@ -37,36 +37,24 @@ lines =
 
 ```elixir
 defmodule Line do
-  def generate_points({x1, y1, x2, y2}) when y1 == y2 do
-    Enum.map(x1..x2, fn x -> {x, y1} end)
+  def generate_points({x1, y, x2, y}) do
+    Enum.map(x1..x2, fn x -> {x, y} end)
   end
 
-  def generate_points({x1, y1, x2, y2}) when x1 == x2 do
-    Enum.map(y1..y2, fn y -> {x1, y} end)
+  def generate_points({x, y1, x, y2}) do
+    Enum.map(y1..y2, fn y -> {x, y} end)
   end
 
   def generate_points({x1, y1, x2, y2}) do
-    diagonal(x1, y1, x2, y2, [])
-  end
-
-  def diagonal(x1, y1, x2, y2, points) do
-    xinc = if x1 > x2, do: -1, else: 1
-    yinc = if y1 > y2, do: -1, else: 1
-    new_points = [{x1, y1} | points]
-
-    if x1 != x2 do
-      diagonal(x1 + xinc, y1 + yinc, x2, y2, new_points)
-    else
-      [{x2, y2} | points]
-    end
+    Enum.zip(x1..x2, y1..y2)
   end
 
   def is_diagonal({x1, y1, x2, y2}) when x1 != x2 and y1 != y2 do
-    true
+    false
   end
 
   def is_diagonal({_, _, _, _}) do
-    false
+    true
   end
 end
 
@@ -134,6 +122,8 @@ lines =
   end)
 ```
 
+<!-- livebook:{"reevaluate_automatically":true} -->
+
 ```elixir
 lines =
   lines
@@ -161,6 +151,8 @@ Enum.each(0..9, fn y ->
   IO.puts(line)
 end)
 ```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
 
 ```elixir
 lines
