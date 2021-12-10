@@ -1,0 +1,59 @@
+<!-- vim: syntax=markdown -->
+
+# Day 6
+
+## Setup
+
+```elixir
+Mix.install(
+  [
+    {:kino, "~> 0.4.1"}
+  ],
+  consolidate_protocols: false
+)
+```
+
+```elixir
+input = Kino.Input.textarea("Please paste your input:")
+```
+
+```elixir
+# convert lines to list of tuples with four intergers
+# [{0, 1, 2, 3},...]
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split(",", trim: true)
+  |> Enum.map(&String.to_integer/1)
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Fish do
+  def process(_current_day = [], next_day, _new_fish = 0) do
+    Enum.reverse(next_day)
+  end
+
+  def process(_current_day = [], next_day, new_fish) do
+    Enum.reduce(0..(new_fish - 1), next_day, fn _, next_day -> [8 | next_day] end)
+    |> Enum.reverse()
+  end
+
+  def process(current_day, next_day, new_fish) do
+    [fish | tail] = current_day
+
+    cond do
+      fish == 0 -> process(tail, [6 | next_day], new_fish + 1)
+      fish -> process(tail, [fish - 1 | next_day], new_fish)
+    end
+  end
+end
+
+Enum.reduce(0..79, lines, fn _, lines ->
+  Fish.process(lines, [], 0)
+end)
+|> Enum.count()
+```
