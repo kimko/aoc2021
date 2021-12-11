@@ -11,10 +11,16 @@ Mix.install(
   ],
   consolidate_protocols: false
 )
+
+input = Kino.Input.text("Please paste your input:")
 ```
 
 ```elixir
-input = Kino.Input.textarea("Please paste your input:")
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split(",", trim: true)
+  |> Enum.map(&String.to_integer/1)
 ```
 
 ```elixir

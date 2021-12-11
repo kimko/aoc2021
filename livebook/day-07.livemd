@@ -1,0 +1,57 @@
+<!-- vim: syntax=markdown -->
+
+# Day 7
+
+## Setup
+
+```elixir
+Mix.install(
+  [
+    {:kino, "~> 0.4.1"}
+  ],
+  consolidate_protocols: false
+)
+
+input = Kino.Input.text("Please paste your input:")
+```
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split(",", trim: true)
+  |> Enum.map(&String.to_integer/1)
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Day7 do
+  def balance_positions(list, target) do
+    Enum.reduce(list, 0, fn position, fuel ->
+      fuel + abs(target - position)
+    end)
+  end
+end
+
+max = Enum.max(lines)
+min = Enum.min(lines)
+
+lines
+|> Day7.balance_positions(2)
+
+Enum.reduce(min..max, {lines, 0}, fn target, {lines, lowest_fuel} ->
+  fuel = Day7.balance_positions(lines, target)
+
+  {lines,
+   if fuel < lowest_fuel || lowest_fuel == 0 do
+     fuel
+   else
+     lowest_fuel
+   end}
+end)
+```
+
+## Part 2
