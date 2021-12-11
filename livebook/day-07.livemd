@@ -55,3 +55,43 @@ end)
 ```
 
 ## Part 2
+
+```elixir
+defmodule Day7 do
+  def calculate_fuel(_delta = 0, _next_fuel, total_fuel) do
+    total_fuel
+  end
+
+  def calculate_fuel(delta, next_fuel, total_fuel) do
+    calculate_fuel(delta - 1, next_fuel + 1, total_fuel + next_fuel)
+  end
+
+  def balance_positions2(list, target) do
+    Enum.reduce(list, 0, fn position, fuel ->
+      fuel + Day7.calculate_fuel(abs(target - position), 1, 0)
+    end)
+  end
+end
+
+max = Enum.max(lines)
+min = Enum.min(lines)
+
+lines
+|> Day7.balance_positions2(2)
+
+Enum.reduce(min..max, {lines, 0}, fn target, {lines, lowest_fuel} ->
+  fuel = Day7.balance_positions2(lines, target)
+
+  {lines,
+   if fuel < lowest_fuel || lowest_fuel == 0 do
+     fuel
+   else
+     lowest_fuel
+   end}
+end)
+```
+
+```elixir
+16 - 5
+1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11
+```
