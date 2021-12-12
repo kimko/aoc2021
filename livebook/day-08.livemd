@@ -1,0 +1,54 @@
+<!-- vim: syntax=markdown -->
+
+# Day 7
+
+## Setup
+
+| be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe |
+| edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc     |
+| fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg          |
+| fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega | efabcd cedba gadfec cb    |
+| aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga | gecf egdcabf bgf bfgea    |
+| fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf | gebdcfa ecba ca fadegcb   |
+| dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf | cefg dcbef fcge gbcadfe   |
+| bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd | ed bcgafe cdgba cbgef     |
+| egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb        |
+| gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce       |
+
+```elixir
+Mix.install(
+  [
+    {:kino, "~> 0.4.1"}
+  ],
+  consolidate_protocols: false
+)
+
+input = Kino.Input.textarea("Please paste your input:")
+```
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split(["\n", "|"], trim: true)
+  |> Enum.chunk_every(2)
+  |> Enum.map(fn [signal, output] ->
+    {String.split(signal, " ", trim: true), String.split(output, " ", trim: true)}
+  end)
+```
+
+## Part 1
+
+```elixir
+lines
+|> Enum.map(fn {_signal, output} ->
+  # List.to_tuple(output) 
+  # IO.puts(inspect(output))
+  Enum.map(output, &String.length/1)
+  |> tap(fn x -> IO.puts(inspect(x)) end)
+  |> Enum.count(fn length -> length in [2, 3, 4, 7] end)
+end)
+|> Enum.sum()
+```
+
+## Part 2
