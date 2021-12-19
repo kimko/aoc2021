@@ -27,13 +27,25 @@ input = Kino.Input.textarea("Please paste your input:")
 ```
 
 ```elixir
+defmodule Clean do
+  def split_and_sort(string_list) do
+    string_list
+    |> String.split(" ", trim: true)
+    |> Enum.map(fn string ->
+      string
+      |> String.to_charlist()
+      |> Enum.sort()
+    end)
+  end
+end
+
 lines =
   input
   |> Kino.Input.read()
   |> String.split(["\n", "|"], trim: true)
   |> Enum.chunk_every(2)
   |> Enum.map(fn [signal, output] ->
-    {String.split(signal, " ", trim: true), String.split(output, " ", trim: true)}
+    {Clean.split_and_sort(signal), Clean.split_and_sort(output)}
   end)
 ```
 
@@ -42,13 +54,496 @@ lines =
 ```elixir
 lines
 |> Enum.map(fn {_signal, output} ->
-  # List.to_tuple(output) 
-  # IO.puts(inspect(output))
-  Enum.map(output, &String.length/1)
-  |> tap(fn x -> IO.puts(inspect(x)) end)
+  Enum.map(output, &Enum.count/1)
   |> Enum.count(fn length -> length in [2, 3, 4, 7] end)
 end)
 |> Enum.sum()
 ```
 
-## Part 2
+## Part 2 🙈
+
+```
+be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb |
+fdgacbe cefdb cefbgd gcbe
+  {['be', 'abcdefg', 'bcdefg', 'acdefg', 'bceg', 'cdefg', 'abdefg', 'bcdef', 'abcdf', 'bde'],
+   ['abcdefg'8, 'bcdef'3, 'bcdefg'9, 'bceg']4}
+
+ be
+ edb
+ abcdefg
+ cgeb
+ cdefg
+ abcdf
+ bcdef
+ abdefg
+ bcdefg
+ acdefg
+
+known   dcfgeb
+unknown a
+
+          1234567
+Length  | Signal | Integer | Pattern
+2           b  e   1          3  6   <>
+3         d b  e   7 -----  1 3  6   <>
+4          gbc e   4         234 6   <>
+7         dgbcaef  8 -----  1234567  <> 
+5         d bca f  2        1 345 7
+5         d bc ef  3 -----  1 34 67
+5         dgbc ef  5        12 4 67
+6         dgb aef  0 -----  123 567
+6         dgbcaef  6        12 4567
+6         dgbc ef  9 -----  1234 67  
+```
+
+```
+- pos 4 (search [4,7,5]   occurs in all of them)
+- pos 1 (search [2,3,4,7] occurs in 3 and 7 only)
+- pos 7 (search [7,5,6]   occurs in all of them)
+- pos 6 (search [2,3,4,6] occurs everywhere AND in TWO [5])
+- pos 3 (search [3]       only one unknown remaining)
+- pos 5 (search [7,6] occurs everywhere and just in ONE [5])
+- pos 2 (last unknown)
+```
+
+['abefg', 'ac', 'abcefg', 'abcdefg', 'acdefg', 'bcdfg', 'abce', 'abdefg', 'abcfg', 'acf']
+
+ac
+acf
+abce
+abcdefg
+
+abefg
+bcdfg
+abcfg
+
+abcefg
+acdefg
+abdefg
+
+acdefg
+
+```
+      1_34567
+```
+
+Length  | Signal | Integer | Pattern
+2           c  a    1          3  6   <>
+3         f c  a    7 -----  1 3  6   <>
+4          dcb ag   4         234 6   <>
+7         fdcbeag   8 -----  1234567  <> 
+5         f cbe g   2        1 345 7
+5         f cb ag   3 -----  1 34 67
+5         fd b ag   5        12 4 67
+6         fdc eag   0 -----  123 567
+6         fd beag   6        12 4567
+6         fdcb ag   9 -----  1234 67
+
+```
+  {['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab'],
+   ['bcdef'5, 'abcdf'3, 'bcdef'5, 'abcdf'3]}
+
+ab
+abd  
+abef
+abcdefg
+
+bcdef
+acdfg
+abcdf
+
+abcdef
+bcdefg
+abcdeg
+
+
+dfceba
+g
+          1  4  7
+Length  | Signal | Integer | Pattern
+2           a  b    1          3  6   <>
+3         d a  b    7 -----  1 3  6   <>
+4          eaf b    4         234 6   <>
+7         deafgbc   8 -----  1234567  <> 
+5         d afg c   2        1 345 7
+5         d af bc   3 -----  1 34 67
+5         de f bc   5        12 4 67
+6         dea gbc   0 -----  123 567
+6         de fgbc   6        12 4567
+6         deaf bc   9 -----  1234 67  
+
+
+Actual
+  0:(6)   1:(2)   2:(5)   3:(5)   4:(4)
+ 1111    ....    1111    1111    ....
+2    3  .    3  .    3  .    3  2    3
+2    3  .    3  .    3  .    3  2    3
+ ....    ....    4444    4444    4444
+5    6  .    6  5    .  .    6  .    6
+5    6  .    6  5    .  .    6  .    6
+ 7777    ....    7777    7777    ....
+
+  5:(5)   6:(6)   7:(3)   8:(7)   9:(6)
+ 1111    1111    1111    1111    1111
+2    .  2    .  .    3  2    3  2    3
+2    .  2    .  .    3  2    3  2    3
+ 4444    4444    ....    4444    4444
+.    6  5    6  .    6  5    6  .    6
+.    6  5    6  .    6  5    6  .    6
+ 7777    7777    ....    7777    7777
+
+
+Template
+  0:      1:      2:      3:      4:
+ 1111    ....    1111    1111    ....
+2    3  .    3  .    3  .    3  2    3
+2    3  .    3  .    3  .    3  2    3
+ ....    ....    4444    4444    4444
+5    6  .    6  5    .  .    6  .    6
+5    6  .    6  5    .  .    6  .    6
+ 7777    ....    7777    7777    ....
+
+  5:      6:      7:      8:      9:
+ 1111    1111    1111    1111    1111
+2    .  2    .  .    3  2    3  2    3
+2    .  2    .  .    3  2    3  2    3
+ 4444    4444    ....    4444    4444
+.    6  5    6  .    6  5    6  .    6
+.    6  5    6  .    6  5    6  .    6
+ 7777    7777    ....    7777    7777
+
+```
+
+```elixir
+# - pos 4 (search [4,7,5]   occurs in all of them)
+# - pos 1 (search [2,3,4,7] occurs in 3 and 7 only)
+# - pos 7 (search [7,5,6]   occurs in all of them)
+# - pos 6 (search [2,3,4,6] occurs everywhere AND in TWO [5])
+# - pos 3 (search [3]       only one unknown remaining)
+# - pos 5 (search [7,6] occurs everywhere and just in ONE [5])
+# - pos 2 (last unknown)
+
+defmodule Part2 do
+  def unique_chars_in_signals(signals) do
+    x =
+      Enum.reduce(signals, [], fn chars, uniq_chars -> '#{chars}#{uniq_chars}' |> Enum.uniq() end)
+
+    # IO.puts(Enum.to_list(x))
+    x
+  end
+
+  def pos4({_, _, _unknown_chars = [], _}) do
+    raise "UHO.. pos4 did not find anything"
+  end
+
+  def pos4({signals, {p1, p2, p3, p4, p5, p6, p7}, [char | unknown_chars], remaining_chars}) do
+    if Part2.char_present_in_all_lists(char, signals[5] ++ signals[4] ++ signals[7]) do
+      remaining_chars =
+        remaining_chars
+        |> List.delete_at(Enum.find_index(remaining_chars, &(char == &1)))
+
+      {signals, {p1, p2, p3, char, p5, p6, p7}, remaining_chars, remaining_chars}
+    else
+      Part2.pos4({signals, {p1, p2, p3, p4, p5, p6, p7}, unknown_chars, remaining_chars})
+    end
+  end
+
+  def pos1({_, _, _unknown_chars = [], _}) do
+    raise "UHO.. pos1 did not find anything"
+  end
+
+  def pos1({signals, {p1, p2, p3, p4, p5, p6, p7}, [char | unknown_chars], remaining_chars}) do
+    if Part2.char_present_in_all_lists(char, signals[3] ++ signals[7]) and
+         Part2.char_not_present(char, signals[2] ++ signals[4]) do
+      remaining_chars =
+        remaining_chars
+        |> List.delete_at(Enum.find_index(remaining_chars, &(char == &1)))
+
+      {signals, {char, p2, p3, p4, p5, p6, p7}, remaining_chars, remaining_chars}
+    else
+      Part2.pos1({signals, {p1, p2, p3, p4, p5, p6, p7}, unknown_chars, remaining_chars})
+    end
+  end
+
+  def pos7({_, _, _unknown_chars = [], _}) do
+    raise "UHO.. pos7 did not find anything"
+  end
+
+  def pos7({signals, {p1, p2, p3, p4, p5, p6, p7}, [char | unknown_chars], remaining_chars}) do
+    if Part2.char_present_in_all_lists(char, signals[5] ++ signals[6] ++ signals[7]) do
+      remaining_chars =
+        remaining_chars
+        |> List.delete_at(Enum.find_index(remaining_chars, &(char == &1)))
+
+      {signals, {p1, p2, p3, p4, p5, p6, char}, remaining_chars, remaining_chars}
+    else
+      Part2.pos7({signals, {p1, p2, p3, p4, p5, p6, p7}, unknown_chars, remaining_chars})
+    end
+  end
+
+  def pos2({_, _, _unknown_chars = [], _}) do
+    raise "UHO.. pos2 did not find anything"
+  end
+
+  def pos2({signals, {p1, p2, p3, p4, p5, p6, p7}, [char | unknown_chars], remaining_chars}) do
+    if Part2.char_present_in_all_lists(char, signals[4] ++ signals[7]) and
+         Part2.char_present_in_one_list_only(char, signals[5]) do
+      remaining_chars =
+        remaining_chars
+        |> List.delete_at(Enum.find_index(remaining_chars, &(char == &1)))
+
+      {signals, {p1, char, p3, p4, p5, p6, p7}, remaining_chars, remaining_chars}
+    else
+      Part2.pos2({signals, {p1, p2, p3, p4, p5, p6, p7}, unknown_chars, remaining_chars})
+    end
+  end
+
+  def pos6({_, _, _unknown_chars = [], _}) do
+    raise "UHO.. pos6 did not find anything"
+  end
+
+  def pos6({signals, {p1, p2, p3, p4, p5, p6, p7}, [char | unknown_chars], remaining_chars}) do
+    # IO.puts(
+    #   "pos6 #{inspect(signals[2] ++ signals[3] ++ signals[4] ++ signals[5] ++ signals[6] ++ signals[7])} #{List.to_string([char])} #{unknown_chars}"
+    # )
+    if Part2.char_present_in_all_lists(
+         char,
+         signals[2] ++ signals[3] ++ signals[4] ++ signals[6]
+       ) and
+         Part2.char_present_in_two_lists(char, signals[5]) do
+      remaining_chars =
+        remaining_chars
+        |> List.delete_at(Enum.find_index(remaining_chars, &(char == &1)))
+
+      {signals, {p1, p2, p3, p4, p5, char, p7}, remaining_chars, remaining_chars}
+    else
+      Part2.pos6({signals, {p1, p2, p3, p4, p5, p6, p7}, unknown_chars, remaining_chars})
+    end
+  end
+
+  def pos3({_, _, _unknown_chars = [], _}) do
+    raise "UHO.. pos3 did not find anything"
+  end
+
+  def pos3({signals, {p1, p2, p3, p4, p5, p6, p7}, [char | unknown_chars], remaining_chars}) do
+    if char in List.first(signals[3]) do
+      remaining_chars =
+        remaining_chars
+        |> List.delete_at(Enum.find_index(remaining_chars, &(char == &1)))
+
+      {signals, {p1, p2, char, p4, p5, p6, p7}, remaining_chars, remaining_chars}
+    else
+      Part2.pos3({signals, {p1, p2, p3, p4, p5, p6, p7}, unknown_chars, remaining_chars})
+    end
+  end
+
+  def pos5({_, _, _unknown_chars = [], _}) do
+    raise "UHO.. pos5 did not find anything"
+  end
+
+  def pos5({signals, {p1, p2, p3, p4, p5, p6, p7}, [char | unknown_chars], remaining_chars}) do
+    if Part2.char_present_in_all_lists(
+         char,
+         signals[7] ++ signals[6]
+       ) and
+         Part2.char_present_in_one_list_only(char, signals[5]) do
+      remaining_chars =
+        remaining_chars
+        |> List.delete_at(Enum.find_index(remaining_chars, &(char == &1)))
+
+      {signals, {p1, p2, p3, p4, char, p6, p7}, remaining_chars, remaining_chars}
+    else
+      Part2.pos5({signals, {p1, p2, p3, p4, p5, p6, p7}, unknown_chars, remaining_chars})
+    end
+  end
+
+  def char_present_in_one_list_only(char, lists) do
+    Enum.count(lists, fn list -> char in list end) == 1
+  end
+
+  def char_present_in_two_lists(char, lists) do
+    Enum.count(lists, fn list -> char in list end) == 2
+  end
+
+  def char_present_in_all_lists_except_one(char, lists) do
+    IO.puts("char_present_in_all_lists_except_one")
+    IO.puts(List.to_string([char]))
+    IO.puts(inspect(lists))
+    Enum.count(lists, fn list -> [char] in list end) == 2
+  end
+
+  def char_present_in_all_lists(char, lists) do
+    Enum.all?(lists, &(char in &1))
+  end
+
+  def char_not_present(char, lists) do
+    Enum.all?(lists, &(char not in &1))
+  end
+
+  def wire_connections({p1, p2, p3, p4, p5, p6, p7}) do
+    IO.puts({p1, p2, p3, p4, p5, p6, p7} |> Tuple.to_list())
+
+    %{
+      Enum.sort([p1, p2, p3, p5, p6, p7]) => 0,
+      Enum.sort([p3, p6]) => 1,
+      Enum.sort([p1, p3, p4, p5, p7]) => 2,
+      Enum.sort([p1, p3, p4, p6, p7]) => 3,
+      Enum.sort([p2, p3, p4, p6]) => 4,
+      Enum.sort([p1, p2, p4, p6, p7]) => 5,
+      Enum.sort([p1, p2, p4, p5, p6, p7]) => 6,
+      Enum.sort([p1, p3, p6]) => 7,
+      Enum.sort([p1, p2, p3, p4, p5, p6, p7]) => 8,
+      Enum.sort([p1, p2, p3, p4, p6, p7]) => 9
+    }
+  end
+
+  def get_config_from_signals(signals, config, unknown_chars) do
+    signals
+    |> Enum.group_by(&Enum.count/1)
+    |> (fn signals -> Part2.pos4({signals, config, unknown_chars, unknown_chars}) end).()
+    |> Part2.pos1()
+    |> Part2.pos7()
+    |> Part2.pos6()
+    |> Part2.pos3()
+    |> Part2.pos5()
+    |> (fn {signals, {p1, _, p3, p4, p5, p6, p7}, unknown_chars, _remaining_chars} ->
+          IO.puts(inspect(signals))
+          {p1, unknown_chars |> List.first(), p3, p4, p5, p6, p7}
+        end).()
+    |> Part2.wire_connections()
+  end
+end
+
+# [{signals, output} | _] = lines
+
+# Part2.unique_chars_in_signals([
+#   'be',
+#   'abcdefg',
+#   'bcdefg',
+#   'acdefg',
+#   'bceg',
+#   'cdefg',
+#   'abdefg',
+#   'bcdef',
+#   'abcdf',
+#   'bde'
+# ])
+
+# config =
+#   Part2.get_config_from_signals(
+#     signals,
+#     {1, 2, 3, 4, 5, 6, 7, 8, 9},
+#     Part2.unique_chars_in_signals(signals)
+#   )
+[lines | _] = lines
+
+configs =
+  [lines]
+  |> Enum.map(fn {signals, outputs} ->
+    config =
+      Part2.get_config_from_signals(
+        signals,
+        {1, 2, 3, 4, 5, 6, 7},
+        Part2.unique_chars_in_signals(signals)
+      )
+
+    IO.puts("Config #{inspect(config)}")
+
+    Enum.map(outputs, fn output ->
+      IO.puts(inspect(output))
+      Map.get(config, output)
+    end)
+  end)
+```
+
+{['be', 'abcdefg', 'bcdefg', 'acdefg', 'bceg', 'cdefg', 'abdefg', 'bcdef', 'abcdf', 'bde'],
+   ['abcdefg', 'bcdef', 'bcdefg', 'bceg']},
+
+{d, a, b, c, g, e, f'
+[p1, p2, p3,}
+
+Template
+  0:      1:      2:      3:      4:
+ 1111    ....    1111    1111    ....
+2    3  .    3  .    3  .    3  2    3
+2    3  .    3  .    3  .    3  2    3
+ ....    ....    4444    4444    4444
+5    6  .    6  5    .  .    6  .    6
+5    6  .    6  5    .  .    6  .    6
+ 7777    ....    7777    7777    ....
+
+5:      6:      7:      8:      9:
+ 1111    1111    1111    1111    1111
+2    .  2    .  .    3  2    3  2    3
+2    .  2    .  .    3  2    3  2    3
+ 4444    4444    ....    4444    4444
+.    6  5    6  .    6  5    6  .    6
+.    6  5    6  .    6  5    6  .    6
+ 7777    7777    ....    7777    7777
+
+## Part 2 José
+
+```elixir
+parsed =
+  input
+  |> Kino.Input.read()
+  |> String.split([" |\n", " | ", "\n"], trim: true)
+  |> Enum.chunk_every(2)
+  |> Enum.map(fn [input, output] ->
+    {input |> String.split() |> Enum.group_by(&byte_size/1, &String.to_charlist/1),
+     output |> String.split() |> Enum.map(&String.to_charlist/1)}
+  end)
+```
+
+```elixir
+supersets = fn numbers, pivot ->
+  Enum.filter(numbers, &match?([], pivot -- &1))
+end
+
+almost_supersets = fn numbers, pivot ->
+  Enum.filter(numbers, &match?([_], pivot -- &1))
+end
+
+parsed
+|> Enum.map(fn {input, output} ->
+  %{
+    2 => [one],
+    3 => [seven],
+    4 => [four],
+    5 => two_three_five,
+    6 => zero_six_nine,
+    7 => [eight]
+  } = input
+
+  [nine] = supersets.(zero_six_nine, four)
+  [six] = almost_supersets.(zero_six_nine, seven)
+  [zero] = zero_six_nine -- [six, nine]
+
+  [three] = supersets.(two_three_five, seven)
+  [five] = almost_supersets.(two_three_five, six)
+  [two] = two_three_five -- [three, five]
+
+  numbers = %{
+    Enum.sort(zero) => 0,
+    Enum.sort(one) => 1,
+    Enum.sort(two) => 2,
+    Enum.sort(three) => 3,
+    Enum.sort(four) => 4,
+    Enum.sort(five) => 5,
+    Enum.sort(six) => 6,
+    Enum.sort(seven) => 7,
+    Enum.sort(eight) => 8,
+    Enum.sort(nine) => 9
+  }
+
+  [d1, d2, d3, d4] = output
+
+  Integer.undigits([
+    numbers[Enum.sort(d1)],
+    numbers[Enum.sort(d2)],
+    numbers[Enum.sort(d3)],
+    numbers[Enum.sort(d4)]
+  ])
+end)
+|> Enum.sum()
+```
