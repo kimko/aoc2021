@@ -1,0 +1,79 @@
+<!-- vim: syntax=markdown -->
+
+# Day9
+
+## Setup
+
+```elixir
+Mix.install(
+  [
+    {:kino, "~> 0.4.1"}
+  ],
+  consolidate_protocols: false
+)
+
+input = Kino.Input.textarea("Please paste your input:")
+```
+
+```elixir
+parsed =
+  input
+  |> Kino.Input.read()
+  |> String.split([" |\n", " | ", "\n"], trim: true)
+  |> Enum.map(fn string -> "9#{string}9" end)
+  |> (fn parsed -> ["999999999999"] ++ parsed ++ ["999999999999"] end).()
+  |> Enum.map(&String.to_charlist/1)
+
+parsed_x =
+  parsed
+  |> Enum.map(fn string -> Enum.zip(0..Enum.count(string), string) end)
+
+parsed_y =
+  parsed
+  # transpose
+  |> Enum.zip_with(fn x -> x end)
+  |> Enum.map(fn string -> Enum.zip(0..Enum.count(string), string) end)
+
+[string | rem] = parsed_x
+[string | _] = rem
+parsed
+
+# string
+# |> Enum.chunk_every(3)
+# Enum.zip(0..Enum.count(string), string)
+```
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+
+# |> Enum.map(fn string -> Enum.with_index(fn {index, letter} -> %{
+#   index => letter
+# }end)end)
+
+grid =
+  for {line, row} <- Enum.with_index(lines),
+      {number, col} <- Enum.with_index(String.to_charlist(line)),
+      into: %{} do
+    {{col, row}, number - ?0}
+  end
+```
+
+## Part 1
+
+```elixir
+grid
+|> Enum.filter(fn {{col, row}, value} ->
+  p1 = Map.get(grid, {col + 1, row})
+  p2 = Map.get(grid, {col - 1, row})
+  p3 = Map.get(grid, {col, row + 1})
+  p4 = Map.get(grid, {col, row - 1})
+  value < p1 and value < p2 and value < p3 and value < p4
+end)
+|> Enum.map(fn {_, highpoint} -> highpoint + 1 end)
+|> Enum.sum()
+```
+
+## Part 2
