@@ -20,8 +20,9 @@ chunks =
   input
   |> Kino.Input.read()
   |> String.split(["\n"], trim: true)
-  # |> (fn parsed -> ["999999999999"] ++ parsed ++ ["999999999999"] end).()
-  |> Enum.map(&String.to_charlist/1)
+
+# |> (fn parsed -> ["999999999999"] ++ parsed ++ ["999999999999"] end).()
+# |> Enum.map(&String.to_charlist/1)
 ```
 
 ## Part 1
@@ -106,6 +107,7 @@ end
 # [chunk | _ ] = chunks
 # Part1.validate_chunk(chunk, {0, Stack.new})
 chunks
+|> Enum.map(&String.to_charlist/1)
 |> Enum.map(fn chunk -> Part1.find_bug(chunk, {0, Stack.new()}) end)
 |> Enum.filter(fn {is_buggy, _bug, _incompleted} -> is_buggy end)
 |> Enum.reduce(0, fn {_, bug_char, _}, score ->
@@ -141,10 +143,71 @@ end
 
 scores =
   chunks
+  |> Enum.map(&String.to_charlist/1)
   |> Enum.map(fn chunk -> Part1.find_bug(chunk, {0, Stack.new()}) end)
   |> Enum.filter(fn {is_buggy, _bug, _incompleted} -> is_buggy == false end)
   |> Enum.map(&Part2.score_incomplete/1)
   |> Enum.sort()
 
 Enum.fetch!(scores, trunc(Enum.count(scores) / 2))
+```
+
+## Jose
+
+```elixir
+defmodule Syntax do
+  def parse(line), do: parse(line, [])
+
+  # Opening
+  defp parse(<<?(, rest::binary>>, stack), do: parse(rest, [?) | stack])
+  defp parse(<<?[, rest::binary>>, stack), do: parse(rest, [?] | stack])
+  defp parse(<<?{, rest::binary>>, stack), do: parse(rest, [?} | stack])
+  defp parse(<<?<, rest::binary>>, stack), do: parse(rest, [?> | stack])
+
+  # Closing
+  defp parse(<<char, rest::binary>>, [char | stack]), do: parse(rest, stack)
+
+  # Base/error cases
+  defp parse(<<char, _rest::binary>>, _stack), do: {:corrupted, char}
+  defp parse(<<>>, []), do: :ok
+  defp parse(<<>>, stack), do: {:incomplete, stack}
+
+  def test(<<char, rest::binary>>) do
+    IO.puts(rest)
+  end
+end
+```
+
+```elixir
+points = %{
+  ?) => 3,
+  ?] => 57,
+  ?} => 1197,
+  ?> => 25137
+}
+
+# Enum.sum(
+for line <- chunks,
+    {:corrupted, char} <- [Syntax.parse(line)],
+    do: Map.fetch!(points, char)
+
+# )
+```
+
+```elixir
+points = %{
+  ?) => 1,
+  ?] => 2,
+  ?} => 3,
+  ?> => 4
+}
+
+scores =
+  Enum.sort(
+    for line <- chunks,
+        {:incomplete, chars} <- [Syntax.parse(line)],
+        do: Enum.reduce(chars, 0, fn char, acc -> acc * 5 + Map.fetch!(points, char) end)
+  )
+
+# Enum.fetch!(scores, div(length(scores), 2))
 ```
