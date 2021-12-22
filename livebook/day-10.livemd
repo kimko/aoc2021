@@ -1,0 +1,118 @@
+<!-- vim: syntax=markdown -->
+
+# Day10
+
+## Setup
+
+```elixir
+Mix.install(
+  [
+    {:kino, "~> 0.4.1"}
+  ],
+  consolidate_protocols: false
+)
+
+input = Kino.Input.textarea("Please paste your input:")
+```
+
+```elixir
+chunks =
+  input
+  |> Kino.Input.read()
+  |> String.split(["\n"], trim: true)
+  # |> (fn parsed -> ["999999999999"] ++ parsed ++ ["999999999999"] end).()
+  |> Enum.map(&String.to_charlist/1)
+```
+
+## Part 1
+
+```elixir
+defmodule Stack do
+  defstruct elements: []
+
+  def new, do: %Stack{}
+
+  def push(stack, element) do
+    %Stack{stack | elements: [element | stack.elements]}
+  end
+
+  def pop(%Stack{elements: []}), do: raise("Stack is empty!")
+
+  def pop(%Stack{elements: [top | rest]}) do
+    {top, %Stack{elements: rest}}
+  end
+
+  def top(%Stack{elements: [top | _rest]}) do
+    top
+  end
+
+  def top(%Stack{elements: []}) do
+    0
+  end
+
+  def depth(%Stack{elements: elements}), do: length(elements)
+end
+
+{last, st} = Stack.new() |> Stack.push(1) |> Stack.push(2) |> Stack.push(2) |> Stack.pop()
+# Stack.new
+# start_end =  %{
+#     '{' => '}',
+#     '[' => ']',
+#     '<' => '>',
+#     '(' => ')'
+#   }
+#   Map.get(start_end, '{')
+Stack.top(st)
+```
+
+```elixir
+defmodule Part1 do
+  @start_chunk '{[(<'
+  @start_end %{
+    '{' => '}',
+    '[' => ']',
+    '<' => '>',
+    '(' => ')'
+  }
+  def find_bug(_chunk = [], {_, _}) do
+    # {:ok, nil}
+    false
+  end
+
+  def find_bug(chunk, {last_started, started_so_far}) do
+    [char | chunk] = chunk
+    # IO.puts("#{chunk} #{[char]} #{[last_started]} #{inspect(started_so_far)}")
+    if char in @start_chunk do
+      find_bug(chunk, {char, Stack.push(started_so_far, char)})
+    else
+      expected = Map.get(@start_end, [last_started])
+
+      if [char] == expected do
+        {_, started_so_far} = Stack.pop(started_so_far)
+        # IO.puts("Closing #{[last_started]} remaining #{inspect(started_so_far)}")
+        find_bug(chunk, {Stack.top(started_so_far), started_so_far})
+      else
+        # {:bug, [last_started], [char]}
+        [char]
+      end
+    end
+  end
+end
+
+# [chunk | _ ] = chunks
+# Part1.validate_chunk(chunk, {0, Stack.new})
+chunks
+|> Enum.map(fn chunk -> Part1.find_bug(chunk, {0, Stack.new()}) end)
+|> Enum.filter(& &1)
+|> Enum.reduce(0, fn bug_char, score ->
+  case bug_char do
+    ')' -> score + 3
+    ']' -> score + 57
+    '}' -> score + 1197
+    '>' -> score + 25137
+    _ -> 99999
+  end
+end)
+```
+
+## Part 2
