@@ -50,6 +50,10 @@ defmodule Stack do
     0
   end
 
+  def elements(%Stack{elements: elements}) do
+    elements
+  end
+
   def depth(%Stack{elements: elements}), do: length(elements)
 end
 
@@ -74,9 +78,9 @@ defmodule Part1 do
     '<' => '>',
     '(' => ')'
   }
-  def find_bug(_chunk = [], {_, _}) do
+  def find_bug(_chunk = [], {last_started, started_so_far}) do
     # {:ok, nil}
-    false
+    {false, [last_started], started_so_far}
   end
 
   def find_bug(chunk, {last_started, started_so_far}) do
@@ -93,7 +97,7 @@ defmodule Part1 do
         find_bug(chunk, {Stack.top(started_so_far), started_so_far})
       else
         # {:bug, [last_started], [char]}
-        [char]
+        {true, [char], started_so_far}
       end
     end
   end
@@ -103,8 +107,8 @@ end
 # Part1.validate_chunk(chunk, {0, Stack.new})
 chunks
 |> Enum.map(fn chunk -> Part1.find_bug(chunk, {0, Stack.new()}) end)
-|> Enum.filter(& &1)
-|> Enum.reduce(0, fn bug_char, score ->
+|> Enum.filter(fn {is_buggy, _bug, _incompleted} -> is_buggy end)
+|> Enum.reduce(0, fn {_, bug_char, _}, score ->
   case bug_char do
     ')' -> score + 3
     ']' -> score + 57
@@ -116,3 +120,31 @@ end)
 ```
 
 ## Part 2
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Part2 do
+  def score_incomplete({_, _, incompleted}) do
+    Stack.elements(incompleted)
+    |> Enum.reduce(0, fn char, score ->
+      case [char] do
+        '(' -> 5 * score + 1
+        '[' -> 5 * score + 2
+        '{' -> 5 * score + 3
+        '<' -> 5 * score + 4
+        _ -> 99999
+      end
+    end)
+  end
+end
+
+scores =
+  chunks
+  |> Enum.map(fn chunk -> Part1.find_bug(chunk, {0, Stack.new()}) end)
+  |> Enum.filter(fn {is_buggy, _bug, _incompleted} -> is_buggy == false end)
+  |> Enum.map(&Part2.score_incomplete/1)
+  |> Enum.sort()
+
+Enum.fetch!(scores, trunc(Enum.count(scores) / 2))
+```
