@@ -1,0 +1,113 @@
+<!-- vim: syntax=markdown -->
+
+# Day11
+
+## Setup
+
+```elixir
+Mix.install(
+  [
+    {:kino, "~> 0.4.1"}
+  ],
+  consolidate_protocols: false
+)
+
+input = Kino.Input.textarea("Please paste your input:")
+
+5_483_143_223
+2_745_854_711
+5_264_556_173
+6_141_336_146
+6_357_385_478
+4_167_524_645
+2_176_841_721
+6_882_881_134
+4_846_848_554
+5_283_751_526
+
+# 11111
+# 19991
+# 19191
+# 19991
+# 11111
+```
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split(["\n"], trim: true)
+
+grid =
+  for {line, row} <- Enum.with_index(lines),
+      {number, col} <- Enum.with_index(String.to_charlist(line)),
+      into: %{} do
+    {{col, row}, number - ?0}
+  end
+
+Map.update(grid, :lines, Enum.count(lines), & &1)
+```
+
+## Part 1
+
+```elixir
+defmodule Recursion do
+  # def step(grid) do
+  #   step({0, 0}, grid, 0)
+  # end
+
+  def energize({row, col} = point, grid, blinks) do
+    # IO.puts(inspect(point))
+    cond do
+      grid[point] == nil ->
+        {grid, blinks}
+
+      grid[point] > 9 ->
+        {grid, blinks}
+
+      grid[point] == 9 ->
+        new_grid = Map.update(grid, point, nil, &(&1 + 1))
+        {new_grid, new_blinks} = energize({row + 1, col}, new_grid, blinks + 1)
+        {new_grid, new_blinks} = energize({row + 1, col + 1}, new_grid, new_blinks)
+        {new_grid, new_blinks} = energize({row, col + 1}, new_grid, new_blinks)
+        {new_grid, new_blinks} = energize({row - 1, col}, new_grid, new_blinks)
+        {new_grid, new_blinks} = energize({row - 1, col - 1}, new_grid, new_blinks)
+        {new_grid, new_blinks} = energize({row, col - 1}, new_grid, new_blinks)
+        {new_grid, new_blinks} = energize({row + 1, col - 1}, new_grid, new_blinks)
+        {new_grid, new_blinks} = energize({row - 1, col + 1}, new_grid, new_blinks)
+
+      true ->
+        {Map.update(grid, point, nil, &(&1 + 1)), blinks}
+    end
+  end
+
+  def step(result, count = 0) do
+    result
+  end
+
+  def step({grid, blinks}, count) do
+    {grid, blinks} =
+      Map.keys(grid)
+      |> Enum.reduce({grid, blinks}, fn point, {grid, blinks} ->
+        {_point, _blinks} = energize(point, grid, blinks)
+      end)
+
+    grid =
+      grid
+      |> Map.new(fn {point, value} ->
+        cond do
+          value > 9 -> {point, 0}
+          true -> {point, value}
+        end
+      end)
+
+    step({grid, blinks}, count - 1)
+  end
+end
+
+{grid, blinks} = Recursion.step({grid, 0}, 100)
+
+blinks
+```
+
+## Part 2
