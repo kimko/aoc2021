@@ -14,16 +14,16 @@ Mix.install(
 
 input = Kino.Input.textarea("Please paste your input:")
 
-5_483_143_223
-2_745_854_711
-5_264_556_173
-6_141_336_146
-6_357_385_478
-4_167_524_645
-2_176_841_721
-6_882_881_134
-4_846_848_554
-5_283_751_526
+# 5483143223
+# 2745854711
+# 5264556173
+# 6141336146
+# 6357385478
+# 4167524645
+# 2176841721
+# 6882881134
+# 4846848554
+# 5283751526
 
 # 11111
 # 19991
@@ -52,12 +52,7 @@ Map.update(grid, :lines, Enum.count(lines), & &1)
 
 ```elixir
 defmodule Recursion do
-  # def step(grid) do
-  #   step({0, 0}, grid, 0)
-  # end
-
-  def energize({row, col} = point, grid, blinks) do
-    # IO.puts(inspect(point))
+  def energize({grid, blinks}, {row, col} = point) do
     cond do
       grid[point] == nil ->
         {grid, blinks}
@@ -66,22 +61,21 @@ defmodule Recursion do
         {grid, blinks}
 
       grid[point] == 9 ->
-        new_grid = Map.update(grid, point, nil, &(&1 + 1))
-        {new_grid, new_blinks} = energize({row + 1, col}, new_grid, blinks + 1)
-        {new_grid, new_blinks} = energize({row + 1, col + 1}, new_grid, new_blinks)
-        {new_grid, new_blinks} = energize({row, col + 1}, new_grid, new_blinks)
-        {new_grid, new_blinks} = energize({row - 1, col}, new_grid, new_blinks)
-        {new_grid, new_blinks} = energize({row - 1, col - 1}, new_grid, new_blinks)
-        {new_grid, new_blinks} = energize({row, col - 1}, new_grid, new_blinks)
-        {new_grid, new_blinks} = energize({row + 1, col - 1}, new_grid, new_blinks)
-        {new_grid, new_blinks} = energize({row - 1, col + 1}, new_grid, new_blinks)
+        energize({Map.update(grid, point, nil, &(&1 + 1)), blinks + 1}, {row + 1, col})
+        |> energize({row + 1, col + 1})
+        |> energize({row, col + 1})
+        |> energize({row - 1, col})
+        |> energize({row - 1, col - 1})
+        |> energize({row, col - 1})
+        |> energize({row + 1, col - 1})
+        |> energize({row - 1, col + 1})
 
       true ->
         {Map.update(grid, point, nil, &(&1 + 1)), blinks}
     end
   end
 
-  def step(result, count = 0) do
+  def step(result, _count = 0) do
     result
   end
 
@@ -89,7 +83,7 @@ defmodule Recursion do
     {grid, blinks} =
       Map.keys(grid)
       |> Enum.reduce({grid, blinks}, fn point, {grid, blinks} ->
-        {_point, _blinks} = energize(point, grid, blinks)
+        energize({grid, blinks}, point)
       end)
 
     grid =
