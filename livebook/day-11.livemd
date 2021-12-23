@@ -30,6 +30,18 @@ input = Kino.Input.textarea("Please paste your input:")
 # 19191
 # 19991
 # 11111
+
+# Input
+2_682_551_651
+3_223_134_263
+5_848_471_412
+7_438_334_862
+8_731_321_573
+6_415_233_574
+5_564_726_843
+6_683_456_445
+8_582_346_112
+4_617_588_236
 ```
 
 ```elixir
@@ -97,11 +109,34 @@ defmodule Recursion do
 
     step({grid, blinks}, count - 1)
   end
+
+  def synchronized(grid) do
+    synchronized({grid, 0}, 0, false)
+  end
+
+  def synchronized(_, step_no, _result = []) do
+    step_no
+  end
+
+  def synchronized({grid, blink}, step_no, _result) do
+    {grid, blink} = step({grid, blink}, 1)
+
+    result =
+      for {_, value} <- grid,
+          value != 0,
+          do: true
+
+    synchronized({grid, blink}, step_no + 1, result)
+  end
 end
 
-{grid, blinks} = Recursion.step({grid, 0}, 100)
+{final_grid, blinks} = Recursion.step({grid, 0}, 100)
 
 blinks
 ```
 
 ## Part 2
+
+```elixir
+Recursion.synchronized(grid)
+```
