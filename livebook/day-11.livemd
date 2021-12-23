@@ -109,25 +109,6 @@ defmodule Recursion do
 
     step({grid, blinks}, count - 1)
   end
-
-  def synchronized(grid) do
-    synchronized({grid, 0}, 0, false)
-  end
-
-  def synchronized(_, step_no, _result = []) do
-    step_no
-  end
-
-  def synchronized({grid, blink}, step_no, _result) do
-    {grid, blink} = step({grid, blink}, 1)
-
-    result =
-      for {_, value} <- grid,
-          value != 0,
-          do: true
-
-    synchronized({grid, blink}, step_no + 1, result)
-  end
 end
 
 {final_grid, blinks} = Recursion.step({grid, 0}, 100)
@@ -138,5 +119,18 @@ blinks
 ## Part 2
 
 ```elixir
-Recursion.synchronized(grid)
+Stream.iterate(1, &(&1 + 1))
+|> Enum.reduce_while({grid, 0}, fn i, {grid, blink} ->
+  {grid, blink} = Recursion.step({grid, blink}, 1)
+
+  result =
+    for {_, value} <- grid,
+        value != 0,
+        do: true
+
+  cond do
+    result == [] -> {:halt, i}
+    true -> {:cont, {grid, blink}}
+  end
+end)
 ```
