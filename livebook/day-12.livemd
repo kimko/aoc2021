@@ -1,0 +1,99 @@
+<!-- vim: syntax=markdown -->
+
+# Day12
+
+## Setup
+
+```elixir
+Mix.install(
+  [
+    {:kino, "~> 0.4.1"}
+  ],
+  consolidate_protocols: false
+)
+
+input = Kino.Input.textarea("Please paste your input:")
+
+# start-A
+# start-b
+# A-c
+# A-b
+# b-d
+# A-end
+# b-end
+```
+
+```elixir
+%{
+  start: ['A', 'b'],
+  A: ['c', 'b', 'end', 'start'],
+  b: ['d', 'end', 'start', 'A'],
+  c: ['A'],
+  d: ['b'],
+  end: ['A', 'b']
+}
+
+# start, A,
+# start, A, c
+# start, A, c, A
+# start, A, c, A, b
+# start, A, c, A, b, end
+# start, A, c, A, b, A
+# start, A, c, A, b, A, end
+# start, A, c, A, end
+# start, A, b
+# start, A, b, end
+# start, A, b, A
+# start, A, b, A, c
+# start, A, b, A, c, A, end
+# start, A, b, A, end
+# start, A, end
+# start, b,
+# start, b, end
+# start, b, A
+# start, b, A, c
+# start, b, A, c, A
+# start, b, A, c, end
+# start, b, A, end
+```
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split(["\n"], trim: true)
+  # |> Enum.map(fn line -> String.split(line, "-")end)
+  |> Enum.reduce(%{}, fn line, map ->
+    [left, right] = String.split(line, "-")
+
+    map
+    |> Map.update(left, MapSet.new([right]), &MapSet.put(&1, right))
+    |> Map.update(right, MapSet.new([left]), &MapSet.put(&1, left))
+  end)
+```
+
+## Part 1
+
+```elixir
+defmodule Recursion do
+  def crawl(_map, _position, path = ['end' | _tail], paths) do
+    [path | paths]
+  end
+
+  def crawl(cave) do
+    crawl(cave, "start", ["start"], [])
+  end
+
+  def crawl(cave, position, path, paths) do
+    cave[position]
+    |> Enum.reduce([], fn pos, paths ->
+      crawl(cave, pos, [pos | path], paths)
+    end)
+  end
+end
+
+# [head | tail] = ['a' | ['x', 'y']]
+# head
+```
+
+## Part 2
